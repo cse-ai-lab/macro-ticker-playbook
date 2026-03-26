@@ -9,7 +9,7 @@
   "ITA": 222.6,
   "FXI": 35.3,
   "INDA": 46.4,
-  "EIS": 119.2
+  "EIS": 119.2,
   "history": {
     "dates": ["Mon", "Tue", "Wed", "Thu", "Fri"],
     "SPY": [641, 646, 650, 655, 653],
