@@ -1,86 +1,155 @@
-body {
-    font-family: Arial;
-    background: #0f1115;
-    color: #f3f4f6;
-    padding: 20px;
-  }
-  
-  .small { color: #94a3b8; }
-  
-  .section {
-    background: #171a21;
-    border: 1px solid #2a2f3a;
-    border-radius: 12px;
-    padding: 16px;
-    margin-top: 16px;
-  }
-  
-  .controls {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-  }
-  
-  button {
-    margin-right: 8px;
-    padding: 6px 10px;
-    background: #1f2937;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  
-  .group {
-    margin-top: 20px;
-  }
-  
-  .group-title {
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
-  }
+/* -------- BASE -------- */
 
-  .tile {
-    background: #171a21;
-    border-radius: 10px;
-    padding: 10px;
-    border: 1px solid #2a2f3a;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .tile.big { font-size: 20px; }
-  .tile.med { font-size: 16px; }
-  .tile.small { font-size: 13px; }
-  .tile.big {
-    box-shadow: 0 0 6px rgba(255,255,255,0.05);
-  }
-  
-  .value {
-    font-weight: bold;
-  }
-  
-  .delta {
-    font-size: 12px;
-  }
-  
-  .label {
-    font-size: 12px;
-    color: #94a3b8;
-  }
-  
-  .value {
-    font-size: 20px;
-    font-weight: bold;
-  }
-  
-  .regime {
-    font-size: 18px;
-    font-weight: bold;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #0f1115;
+  color: #f3f4f6;
+  padding: 20px;
+}
+
+.small { color: #94a3b8; }
+
+.section {
+  background: #171a21;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+button {
+  margin-right: 8px;
+  padding: 6px 10px;
+  background: #1f2937;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* -------- GRID (KEY PART) -------- */
+
+#cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+/* -------- TILE -------- */
+
+.tile {
+  position: relative;
+  background: #171a21;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #2a2f3a;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+/* hover = premium feel */
+.tile:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+}
+
+.tile::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 10px 0 0 10px;
+  background: rgba(255,255,255,0.05);
+}
+
+/* SIZE TIERS */
+
+.tile.big {
+  font-size: 20px;
+  grid-column: span 2;
+}
+
+.tile.med {
+  font-size: 16px;
+}
+
+.tile.small {
+  font-size: 13px;
+}
+
+/* TEXT */
+
+.label {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.delta {
+  font-size: 12px;
+}
+
+/* -------- REGIME -------- */
+
+.regime {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* -------- SOFT GROUPING (THE MAGIC) -------- */
+
+/* Liquidity */
+.tile[data-group="Liquidity"] {
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,0.15),
+              0 0 12px rgba(59,130,246,0.05);
+}
+
+/* Safe Haven */
+.tile[data-group="Safe Haven"] {
+  box-shadow: inset 0 0 0 1px rgba(234,179,8,0.15),
+              0 0 12px rgba(234,179,8,0.05);
+}
+
+/* Risk */
+.tile[data-group="Risk"] {
+  box-shadow: inset 0 0 0 1px rgba(34,197,94,0.15),
+              0 0 12px rgba(34,197,94,0.05);
+}
+
+/* Energy */
+.tile[data-group="Energy"] {
+  box-shadow: inset 0 0 0 1px rgba(249,115,22,0.15),
+              0 0 12px rgba(249,115,22,0.05);
+}
+
+/* Credit */
+.tile[data-group="Credit"] {
+  box-shadow: inset 0 0 0 1px rgba(168,85,247,0.15),
+              0 0 12px rgba(168,85,247,0.05);
+}
+
+/* Defense */
+.tile[data-group="Defense"] {
+  box-shadow: inset 0 0 0 1px rgba(239,68,68,0.15),
+              0 0 12px rgba(239,68,68,0.05);
+}
+
+/* Global */
+.tile[data-group="Global"] {
+  box-shadow: inset 0 0 0 1px rgba(20,184,166,0.15),
+              0 0 12px rgba(20,184,166,0.05);
+}
