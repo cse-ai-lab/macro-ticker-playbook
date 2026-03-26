@@ -251,8 +251,18 @@ function renderChart() {
 
   const tickers = ["SPY", "GLD", "USO", "UUP"];
 
+  function getLineColor(t) {
+    const map = {
+      SPY: "rgba(59,130,246,0.9)",   // blue
+      GLD: "rgba(244,114,182,0.8)",  // pink
+      USO: "rgba(251,146,60,0.8)",   // orange
+      UUP: "rgba(250,204,21,0.8)"    // yellow
+    };
+    return map[t] || "rgba(200,200,200,0.6)";
+  }
+
   const datasets = tickers.map(t => {
-    const full = rawData.history[t];
+    const full = rawData.history[t] || [];
     const sliced = getFiltered(full);
 
     let data = sliced;
@@ -263,38 +273,63 @@ function renderChart() {
 
     return {
       label: t,
-      data,
-      borderWidth: 2,
-      tension: 0.25
+      data: data,
+      borderColor: getLineColor(t),
+      backgroundColor: getLineColor(t),
+
+      borderWidth: 1.5,
+      tension: 0.3,
+
+      pointRadius: 0,
+      pointHoverRadius: 3
     };
   });
 
   if (chart) chart.destroy();
 
-  
-
   chart = new Chart(document.getElementById("chart"), {
     type: "line",
-    data: { labels, datasets },
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
     options: {
       responsive: true,
-      plugins: {
-        legend: { labels: { color: "#fff" } }
-      },
-      scales: {
-        x: {
-          ticks: { color: "#aaa", maxTicksLimit: 8 },
-          grid: { color: "#1f2937" }
-        },
-        y: {
-          ticks: { color: "#aaa" },
-          grid: { color: "#1f2937" }
-        }
-      },
+      maintainAspectRatio: false, // 🔥 important for layout control
+
       plugins: {
         legend: {
-          labels: { color: "#ddd" }
+          labels: {
+            color: "#888",
+            boxWidth: 12,
+            padding: 12
+          }
         }
+      },
+
+      scales: {
+        x: {
+          ticks: {
+            color: "#aaa",
+            maxTicksLimit: 8
+          },
+          grid: {
+            color: "rgba(255,255,255,0.05)"
+          }
+        },
+        y: {
+          ticks: {
+            color: "#aaa"
+          },
+          grid: {
+            color: "rgba(255,255,255,0.05)"
+          }
+        }
+      },
+
+      interaction: {
+        mode: "nearest",
+        intersect: false
       }
     }
   });

@@ -202,7 +202,9 @@ button {
 .chart-container {
   flex: 1;
   min-height: 0;
+  max-height: 320px; /* 🔥 key change */
 }
+
 canvas {
   width: 100% !important;
   height: 100% !important;
