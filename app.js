@@ -1,7 +1,7 @@
 let rawData;
 let chart;
-let range = 9999;
-let mode = "raw";
+let range = 365; // default 1Y
+let mode = "norm";
 
 const groups = {
   "Liquidity": ["UUP"],
@@ -17,12 +17,55 @@ fetch("./data/latest.json")
   .then(r => r.json())
   .then(data => {
     rawData = data;
-    document.getElementById("timestamp").innerText = "Last updated: " + data.timestamp;
+    generateHistory();
+
+    document.getElementById("timestamp").innerText =
+      "Last updated: " + data.timestamp;
 
     renderCards();
     renderRegime();
+    renderSignals();
     renderChart();
   });
+
+
+// ---- GENERATE TOY HISTORY ----
+
+function generateHistory() {
+  const days = 365;
+
+  const dates = [];
+  const SPY = [];
+  const GLD = [];
+  const USO = [];
+  const UUP = [];
+
+  let spy = 600;
+  let gld = 420;
+  let uso = 90;
+  let uup = 26;
+
+  for (let i = 0; i < days; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - (days - i));
+
+    dates.push(d.toISOString().slice(0, 10));
+
+    spy += Math.random() * 4 - 2;
+    gld += Math.random() * 2 - 1;
+    uso += Math.random() * 3 - 1.5;
+    uup += Math.random() * 0.1 - 0.05;
+
+    SPY.push(Number(spy.toFixed(2)));
+    GLD.push(Number(gld.toFixed(2)));
+    USO.push(Number(uso.toFixed(2)));
+    UUP.push(Number(uup.toFixed(2)));
+  }
+
+  rawData.history = { dates, SPY, GLD, USO, UUP };
+}
+
+// ---------- UI RENDER ----------
 
 function renderCards() {
   const container = document.getElementById("cards");
@@ -54,9 +97,10 @@ function renderCards() {
   });
 }
 
+// ---------- REGIME ----------
+
 function renderRegime() {
   const d = rawData;
-
   let r = "🟨 Neutral";
 
   if (d.UUP > 27.5 && d.GLD < 405 && d.SPY < 655) {
@@ -70,8 +114,25 @@ function renderRegime() {
   document.getElementById("regime").innerText = r;
 }
 
-function setRange(r) {
-  range = r;
+// ---------- SIGNALS ----------
+
+function renderSignals() {
+  const d = rawData;
+  let signals = [];
+
+  if (d.UUP > 27.5) signals.push("💵 Dollar strong → liquidity tightening");
+  if (d.GLD < 405) signals.push("🪙 Gold weak → forced selling");
+  if (d.USO > 112) signals.push("🛢 Oil elevated → energy shock");
+  if (d.ITA > 220) signals.push("🛡 Defense strong → persistent conflict");
+
+  document.getElementById("signals").innerHTML =
+    signals.map(s => `<div>${s}</div>`).join("");
+}
+
+// ---------- CONTROLS ----------
+
+function setRange(days) {
+  range = days;
   renderChart();
 }
 
@@ -80,16 +141,27 @@ function setMode(m) {
   renderChart();
 }
 
+// ---------- HELPERS ----------
+
+function getFiltered(series) {
+  const len = series.length;
+  return series.slice(Math.max(0, len - range));
+}
+
 function normalize(series) {
   const base = series[0];
   return series.map(v => (v / base) * 100);
 }
 
-function renderChart() {
-  const labels = rawData.history.dates.slice(-range);
+// ---------- CHART ----------
 
-  const datasets = ["SPY", "GLD", "USO", "UUP"].map(t => {
-    let data = rawData.history[t].slice(-range);
+function renderChart() {
+  const labels = getFiltered(rawData.history.dates);
+
+  const tickers = ["SPY", "GLD", "USO", "UUP"];
+
+  const datasets = tickers.map(t => {
+    let data = getFiltered(rawData.history[t]);
 
     if (mode === "norm") {
       data = normalize(data);
@@ -97,8 +169,9 @@ function renderChart() {
 
     return {
       label: t,
-      data: data,
-      borderWidth: 2
+      data,
+      borderWidth: 2,
+      tension: 0.25
     };
   });
 
@@ -108,6 +181,7 @@ function renderChart() {
     type: "line",
     data: { labels, datasets },
     options: {
+      responsive: true,
       plugins: {
         legend: { labels: { color: "#fff" } }
       },
