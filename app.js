@@ -97,22 +97,13 @@ function normalize(series) {
 }
 
 // ---------- UI RENDER ----------
-
 function renderCards() {
   const container = document.getElementById("cards");
   container.innerHTML = "";
 
   Object.entries(groups).forEach(([group, tickers]) => {
-    const groupDiv = document.createElement("div");
-    groupDiv.className = "section";
-
-    groupDiv.innerHTML = `<h3>${group}</h3>`;
-
-    const grid = document.createElement("div");
-    grid.className = "grid";
-
     tickers.forEach(t => {
-      const history = rawData.history[t];
+      const history = rawData.history[t] || [];
       const delta = getDelta(history);
       const color = getColor(delta);
 
@@ -122,20 +113,18 @@ function renderCards() {
 
       const tile = document.createElement("div");
       tile.className = `tile ${size}`;
+      tile.setAttribute("data-group", group);
 
       tile.innerHTML = `
-        <div>${t}</div>
+        <div class="label">${t}</div>
         <div class="value">${rawData[t]}</div>
         <div class="delta" style="color:${color}">
           ${delta}%
         </div>
       `;
 
-      grid.appendChild(tile);
+      container.appendChild(tile);
     });
-
-    groupDiv.appendChild(grid);
-    container.appendChild(groupDiv);
   });
 }
 
