@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Macro Regime Playbook</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #0f1115;
+      color: #f3f4f6;
+    }
+    h1 {
+      margin-bottom: 6px;
+    }
+    p {
+      color: #cbd5e1;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .card {
+      background: #171a21;
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .section {
+      background: #171a21;
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    canvas {
+      margin-top: 8px;
+      background: #11151c;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .small {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Macro Regime Playbook</h1>
+  <p class="small">Educational dashboard for tracking liquidity, gold, oil, and equities.</p>
+  <p id="timestamp" class="small">Loading...</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">UUP</div>
+      <div class="value" id="uup">-</div>
+    </div>
+    <div class="card">
+      <div class="label">GLD</div>
+      <div class="value" id="gld">-</div>
+    </div>
+    <div class="card">
+      <div class="label">USO</div>
+      <div class="value" id="uso">-</div>
+    </div>
+    <div class="card">
+      <div class="label">SPY</div>
+      <div class="value" id="spy">-</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Trend</h2>
+    <canvas id="macroChart"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>Why these tickers?</h2>
+    <p><strong>UUP</strong> tracks dollar strength / cash demand.</p>
+    <p><strong>GLD</strong> tracks gold behavior under fear vs liquidity stress.</p>
+    <p><strong>USO</strong> tracks oil, often the key macro shock variable.</p>
+    <p><strong>SPY</strong> tracks broad U.S. equity risk appetite.</p>
+  </div>
+
+  <script>
+    fetch("./data/latest.json")
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("timestamp").innerText = "Last updated: " + data.timestamp;
+        document.getElementById("uup").innerText = data.UUP;
+        document.getElementById("gld").innerText = data.GLD;
+        document.getElementById("uso").innerText = data.USO;
+        document.getElementById("spy").innerText = data.SPY;
+
+        new Chart(document.getElementById("macroChart"), {
+          type: "line",
+          data: {
+            labels: data.history.dates,
+            datasets: [
+              {
+                label: "SPY",
+                data: data.history.SPY,
+                borderWidth: 2,
+                tension: 0.25
+              },
+              {
+                label: "GLD",
+                data: data.history.GLD,
+                borderWidth: 2,
+                tension: 0.25
+              },
+              {
+                label: "USO",
+                data: data.history.USO,
+                borderWidth: 2,
+                tension: 0.25
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: { color: "#e5e7eb" }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#cbd5e1" },
+                grid: { color: "#263041" }
+              },
+              y: {
+                ticks: { color: "#cbd5e1" },
+                grid: { color: "#263041" }
+              }
+            }
+          }
+        });
+      })
+      .catch(error => {
+        document.getElementById("timestamp").innerText = "Failed to load data.";
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
