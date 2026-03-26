@@ -73,26 +73,37 @@ function renderCards() {
 
   Object.entries(groups).forEach(([group, tickers]) => {
     const groupDiv = document.createElement("div");
-    groupDiv.className = "group";
+    groupDiv.className = "section";
 
-    groupDiv.innerHTML = `<div class="group-title">${group}</div>`;
+    groupDiv.innerHTML = `<h3>${group}</h3>`;
 
-    const cardsDiv = document.createElement("div");
-    cardsDiv.className = "cards";
+    const grid = document.createElement("div");
+    grid.className = "grid";
 
     tickers.forEach(t => {
-      const card = document.createElement("div");
-      card.className = "card";
+      const history = rawData.history[t];
+      const delta = getDelta(history);
+      const color = getColor(delta);
 
-      card.innerHTML = `
-        <div class="label">${t}</div>
+      let size = "small";
+      if (["SPY", "UUP", "USO", "GLD"].includes(t)) size = "big";
+      else if (["APO", "KKR", "ITA"].includes(t)) size = "med";
+
+      const tile = document.createElement("div");
+      tile.className = `tile ${size}`;
+
+      tile.innerHTML = `
+        <div>${t}</div>
         <div class="value">${rawData[t]}</div>
+        <div class="delta" style="color:${color}">
+          ${delta}%
+        </div>
       `;
 
-      cardsDiv.appendChild(card);
+      grid.appendChild(tile);
     });
 
-    groupDiv.appendChild(cardsDiv);
+    groupDiv.appendChild(grid);
     container.appendChild(groupDiv);
   });
 }
@@ -142,6 +153,12 @@ function setMode(m) {
 }
 
 // ---------- HELPERS ----------
+
+function getDelta(series) {
+  const last = series[series.length - 1];
+  const prev = series[series.length - 2];
+  return ((last - prev) / prev * 100).toFixed(2);
+}
 
 function getFiltered(series) {
   const len = series.length;

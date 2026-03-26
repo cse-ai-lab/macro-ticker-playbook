@@ -40,17 +40,34 @@ body {
     margin-bottom: 10px;
   }
   
-  .cards {
+  .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 10px;
   }
-  
-  .card {
+
+  .tile {
     background: #171a21;
-    border: 1px solid #2a2f3a;
     border-radius: 10px;
-    padding: 12px;
+    padding: 10px;
+    border: 1px solid #2a2f3a;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .tile.big { font-size: 20px; }
+  .tile.med { font-size: 16px; }
+  .tile.small { font-size: 13px; }
+  .tile.big {
+    box-shadow: 0 0 6px rgba(255,255,255,0.05);
+  }
+  
+  .value {
+    font-weight: bold;
+  }
+  
+  .delta {
+    font-size: 12px;
   }
   
   .label {
