@@ -24,6 +24,10 @@ fetch("./data/latest.json")
     if (!rawData.history || !rawData.history.dates) {
       generateHistory();
     }
+    
+    if (!rawData.history || rawData.history.dates.length < 30) {
+      generateHistory();
+    }
 
     document.getElementById("timestamp").innerText =
       "Last updated: " + data.timestamp;
@@ -267,6 +271,8 @@ function renderChart() {
 
   if (chart) chart.destroy();
 
+  
+
   chart = new Chart(document.getElementById("chart"), {
     type: "line",
     data: { labels, datasets },
@@ -276,8 +282,19 @@ function renderChart() {
         legend: { labels: { color: "#fff" } }
       },
       scales: {
-        x: { ticks: { color: "#aaa" } },
-        y: { ticks: { color: "#aaa" } }
+        x: {
+          ticks: { color: "#aaa", maxTicksLimit: 8 },
+          grid: { color: "#1f2937" }
+        },
+        y: {
+          ticks: { color: "#aaa" },
+          grid: { color: "#1f2937" }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: "#ddd" }
+        }
       }
     }
   });
