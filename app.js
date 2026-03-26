@@ -26,6 +26,7 @@ fetch("./data/latest.json")
     renderRegime();
     renderSignals();
     renderChart();
+    renderLegend();
   });
 
 
@@ -131,33 +132,63 @@ function renderCards() {
 // ---------- REGIME ----------
 
 function renderRegime() {
+  const el = document.getElementById("regime");
   const d = rawData;
-  let r = "🟨 Neutral";
+
+  let text = "Neutral";
+  let cls = "yellow";
 
   if (d.UUP > 27.5 && d.GLD < 405 && d.SPY < 655) {
-    r = "🟥 Liquidity Stress";
+    text = "Liquidity Stress";
+    cls = "red";
   } else if (d.USO > 112 && d.SPY < 655) {
-    r = "🟧 Energy Shock";
+    text = "Energy Shock";
+    cls = "orange";
   } else if (d.USO < 110 && d.SPY > 650) {
-    r = "🟩 Risk-On";
+    text = "Risk-On";
+    cls = "green";
   }
 
-  document.getElementById("regime").innerText = r;
+  el.className = `regime-pill ${cls}`;
+  el.innerText = text;
+}
+
+function renderLegend() {
+  const el = document.getElementById("legend");
+
+  const items = [
+    ["Liquidity", "#3b82f6"],
+    ["Safe Haven", "#eab308"],
+    ["Risk", "#22c55e"],
+    ["Energy", "#f97316"],
+    ["Credit", "#a855f7"],
+    ["Defense", "#ef4444"],
+    ["Global", "#14b8a6"]
+  ];
+
+  el.innerHTML = items.map(([name, color]) => `
+    <span class="legend-item">
+      <span class="dot" style="background:${color}"></span>
+      ${name}
+    </span>
+  `).join("");
 }
 
 // ---------- SIGNALS ----------
 
 function renderSignals() {
+  const el = document.getElementById("signals");
+  if (!el) return;
+
   const d = rawData;
   let signals = [];
 
-  if (d.UUP > 27.5) signals.push("💵 Dollar strong → liquidity tightening");
-  if (d.GLD < 405) signals.push("🪙 Gold weak → forced selling");
-  if (d.USO > 112) signals.push("🛢 Oil elevated → energy shock");
-  if (d.ITA > 220) signals.push("🛡 Defense strong → persistent conflict");
+  if (d.UUP > 27.5) signals.push("💵 Tight Liquidity");
+  if (d.GLD < 405) signals.push("🪙 Gold Weak");
+  if (d.USO > 112) signals.push("🛢 Oil Elevated");
+  if (d.ITA > 220) signals.push("🛡 Defense Strong");
 
-  document.getElementById("signals").innerHTML =
-    signals.map(s => `<div>${s}</div>`).join("");
+  el.innerHTML = signals.map(s => `<span class="chip">${s}</span>`).join("");
 }
 
 // ---------- CONTROLS ----------
