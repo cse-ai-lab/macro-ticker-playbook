@@ -4,82 +4,32 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Macro Regime Playbook</title>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #0f1115;
-      color: #f3f4f6;
-    }
-
-    h1 { margin-bottom: 6px; }
-    h2 { margin-top: 0; }
-
-    p { color: #cbd5e1; }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin: 20px 0;
-    }
-
-    .card {
-      background: #171a21;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    .label {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .value {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .section {
-      background: #171a21;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-    }
-
-    canvas {
-      margin-top: 8px;
-      background: #11151c;
-      border-radius: 8px;
-      padding: 8px;
-    }
-
-    .small {
-      font-size: 14px;
-      color: #94a3b8;
-    }
-
-    .regime {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 8px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
   <h1>Macro Regime Playbook</h1>
-  <p class="small">Tracking liquidity, gold, oil, equities, credit, and geopolitics.</p>
+  <p class="small">Cross-asset macro monitoring system</p>
   <p id="timestamp" class="small">Loading...</p>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div>
+      <button onclick="setRange(30)">1M</button>
+      <button onclick="setRange(90)">3M</button>
+      <button onclick="setRange(180)">6M</button>
+      <button onclick="setRange(365)">1Y</button>
+      <button onclick="setRange(9999)">ALL</button>
+    </div>
+
+    <div>
+      <button onclick="setMode('raw')">Raw</button>
+      <button onclick="setMode('norm')">Normalized</button>
+    </div>
+  </div>
 
   <!-- REGIME -->
   <div class="section">
@@ -87,114 +37,16 @@
     <div id="regime" class="regime">-</div>
   </div>
 
-  <!-- CARDS -->
-  <div class="cards">
-
-    <div class="card"><div class="label">UUP</div><div class="value" id="uup">-</div></div>
-    <div class="card"><div class="label">GLD</div><div class="value" id="gld">-</div></div>
-    <div class="card"><div class="label">USO</div><div class="value" id="uso">-</div></div>
-    <div class="card"><div class="label">SPY</div><div class="value" id="spy">-</div></div>
-
-    <div class="card"><div class="label">APO</div><div class="value" id="apo">-</div></div>
-    <div class="card"><div class="label">KKR</div><div class="value" id="kkr">-</div></div>
-    <div class="card"><div class="label">ITA</div><div class="value" id="ita">-</div></div>
-    <div class="card"><div class="label">FXI</div><div class="value" id="fxi">-</div></div>
-    <div class="card"><div class="label">INDA</div><div class="value" id="inda">-</div></div>
-    <div class="card"><div class="label">EIS</div><div class="value" id="eis">-</div></div>
-
-  </div>
+  <!-- GROUPED CARDS -->
+  <div id="cards"></div>
 
   <!-- CHART -->
   <div class="section">
     <h2>Trend</h2>
-    <canvas id="macroChart"></canvas>
+    <canvas id="chart"></canvas>
   </div>
 
-  <!-- EDUCATION -->
-  <div class="section">
-    <h2>How to Read This</h2>
-    <p><strong>UUP</strong> → Dollar strength / liquidity demand</p>
-    <p><strong>GLD</strong> → Fear vs forced selling</p>
-    <p><strong>USO</strong> → Energy shock driver</p>
-    <p><strong>SPY</strong> → Risk appetite</p>
-    <p><strong>APO / KKR</strong> → Private credit stress</p>
-    <p><strong>ITA</strong> → Defense / conflict persistence</p>
-    <p><strong>FXI / INDA</strong> → Global macro divergence</p>
-  </div>
-
-  <script>
-    fetch("./data/latest.json")
-      .then(res => res.json())
-      .then(data => {
-
-        // TIMESTAMP
-        document.getElementById("timestamp").innerText = "Last updated: " + data.timestamp;
-
-        // VALUES
-        document.getElementById("uup").innerText = data.UUP;
-        document.getElementById("gld").innerText = data.GLD;
-        document.getElementById("uso").innerText = data.USO;
-        document.getElementById("spy").innerText = data.SPY;
-
-        document.getElementById("apo").innerText = data.APO;
-        document.getElementById("kkr").innerText = data.KKR;
-        document.getElementById("ita").innerText = data.ITA;
-        document.getElementById("fxi").innerText = data.FXI;
-        document.getElementById("inda").innerText = data.INDA;
-        document.getElementById("eis").innerText = data.EIS;
-
-        // REGIME ENGINE
-        function getRegime(d) {
-          if (d.UUP > 27.5 && d.GLD < 405 && d.SPY < 655) {
-            return "🟥 Liquidity Stress";
-          }
-          if (d.USO > 112 && d.SPY < 655) {
-            return "🟧 Energy Shock";
-          }
-          if (d.USO < 110 && d.SPY > 650) {
-            return "🟩 Risk-On / Relief";
-          }
-          return "🟨 Neutral";
-        }
-
-        document.getElementById("regime").innerText = getRegime(data);
-
-        // CHART
-        new Chart(document.getElementById("macroChart"), {
-          type: "line",
-          data: {
-            labels: data.history.dates,
-            datasets: [
-              { label: "SPY", data: data.history.SPY, borderWidth: 2 },
-              { label: "GLD", data: data.history.GLD, borderWidth: 2 },
-              { label: "USO", data: data.history.USO, borderWidth: 2 },
-              { label: "UUP", data: data.history.UUP, borderWidth: 2 }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { labels: { color: "#e5e7eb" } }
-            },
-            scales: {
-              x: {
-                ticks: { color: "#cbd5e1" },
-                grid: { color: "#263041" }
-              },
-              y: {
-                ticks: { color: "#cbd5e1" },
-                grid: { color: "#263041" }
-              }
-            }
-          }
-        });
-
-      })
-      .catch(err => {
-        document.getElementById("timestamp").innerText = "Failed to load data.";
-        console.error(err);
-      });
-  </script>
+  <script src="app.js"></script>
 
 </body>
 </html>
