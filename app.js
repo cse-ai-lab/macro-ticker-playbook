@@ -25,7 +25,7 @@ fetch("./data/latest.json")
       generateHistory();
     }
     
-    if (!rawData.history || rawData.history.dates.length < 30) {
+    if (rawData.history.dates.length < 30) {
       generateHistory();
     }
 

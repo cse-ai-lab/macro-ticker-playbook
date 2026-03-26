@@ -1,10 +1,36 @@
 /* -------- BASE -------- */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
 
 body {
   font-family: Arial, sans-serif;
   background: #0f1115;
   color: #f3f4f6;
   padding: 20px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  gap: 8px;
+}
+
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.small {
+  margin: 2px 0;
+  font-size: 11px;
+}
+
+.controls {
+  margin: 4px 0;
 }
 
 .small { color: #94a3b8; }
@@ -34,21 +60,26 @@ button {
 }
 
 /* -------- MAIN GRID -------- */
-
 #cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 14px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+
+  max-height: 160px;
+  overflow: hidden;
 }
 
+.section h2 {
+  font-size: 14px;
+  margin: 4px 0;
+}
 /* -------- TILE -------- */
 
 .tile {
   position: relative;
   background: #171a21;
   border-radius: 10px;
-  padding: 12px;
+  padding: 8px;
   border: 1px solid #2a2f3a;
   display: flex;
   flex-direction: column;
@@ -166,4 +197,13 @@ button {
   height: 8px;
   border-radius: 50%;
   margin-right: 4px;
+}
+
+.chart-container {
+  flex: 1;
+  min-height: 0;
+}
+canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
