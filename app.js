@@ -29,6 +29,7 @@ fetch("./data/latest.json")
   });
 
 
+
 // ---- GENERATE TOY HISTORY ----
 
 function generateHistory() {
@@ -63,6 +64,36 @@ function generateHistory() {
   }
 
   rawData.history = { dates, SPY, GLD, USO, UUP };
+}
+
+
+// ---------- HELPERS ----------
+
+function getDelta(series) {
+  if (!series || series.length < 2) return 0;
+
+  const last = series[series.length - 1];
+  const prev = series[series.length - 2];
+
+  return ((last - prev) / prev * 100).toFixed(2);
+}
+
+function getColor(delta) {
+  const d = parseFloat(delta);
+
+  if (d > 0) return "#22c55e";   // green
+  if (d < 0) return "#ef4444";   // red
+  return "#9ca3af";              // neutral gray
+}
+
+function getFiltered(series) {
+  const len = series.length;
+  return series.slice(Math.max(0, len - range));
+}
+
+function normalize(series) {
+  const base = series[0];
+  return series.map(v => (v / base) * 100);
 }
 
 // ---------- UI RENDER ----------
@@ -152,23 +183,7 @@ function setMode(m) {
   renderChart();
 }
 
-// ---------- HELPERS ----------
 
-function getDelta(series) {
-  const last = series[series.length - 1];
-  const prev = series[series.length - 2];
-  return ((last - prev) / prev * 100).toFixed(2);
-}
-
-function getFiltered(series) {
-  const len = series.length;
-  return series.slice(Math.max(0, len - range));
-}
-
-function normalize(series) {
-  const base = series[0];
-  return series.map(v => (v / base) * 100);
-}
 
 // ---------- CHART ----------
 
