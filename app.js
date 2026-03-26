@@ -13,11 +13,17 @@ const groups = {
   "Global": ["FXI", "INDA"]
 };
 
+// ---------- LOAD DATA ----------
+
 fetch("./data/latest.json")
   .then(r => r.json())
   .then(data => {
     rawData = data;
-    generateHistory();
+
+    // Only generate fake data if history missing
+    if (!rawData.history || !rawData.history.dates) {
+      generateHistory();
+    }
 
     document.getElementById("timestamp").innerText =
       "Last updated: " + data.timestamp;
@@ -30,8 +36,7 @@ fetch("./data/latest.json")
   });
 
 
-
-// ---- GENERATE TOY HISTORY ----
+// ---------- MOCK HISTORY (SAFE FALLBACK) ----------
 
 function generateHistory() {
   const days = 365;
@@ -70,6 +75,11 @@ function generateHistory() {
 
 // ---------- HELPERS ----------
 
+function getFiltered(series) {
+  const len = series.length;
+  return series.slice(Math.max(0, len - range));
+}
+
 function getDelta(series) {
   if (!series || series.length < 2) return 0;
 
@@ -79,33 +89,45 @@ function getDelta(series) {
   return ((last - prev) / prev * 100).toFixed(2);
 }
 
+// NEW: momentum (stronger signal)
+function getMomentum(series, n = 5) {
+  if (!series || series.length < n) return 0;
+
+  const last = series[series.length - 1];
+  const prev = series[series.length - n];
+
+  return ((last - prev) / prev * 100).toFixed(2);
+}
+
 function getColor(delta) {
   const d = parseFloat(delta);
 
-  if (d > 0) return "#22c55e";   // green
-  if (d < 0) return "#ef4444";   // red
-  return "#9ca3af";              // neutral gray
-}
-
-function getFiltered(series) {
-  const len = series.length;
-  return series.slice(Math.max(0, len - range));
+  if (d > 0) return "#22c55e";
+  if (d < 0) return "#ef4444";
+  return "#9ca3af";
 }
 
 function normalize(series) {
+  if (!series || series.length === 0) return [];
+
   const base = series[0];
   return series.map(v => (v / base) * 100);
 }
 
-// ---------- UI RENDER ----------
+
+// ---------- UI: CARDS ----------
+
 function renderCards() {
   const container = document.getElementById("cards");
   container.innerHTML = "";
 
   Object.entries(groups).forEach(([group, tickers]) => {
     tickers.forEach(t => {
-      const history = rawData.history[t] || [];
+      const fullSeries = rawData.history[t] || [];
+      const history = getFiltered(fullSeries);
+
       const delta = getDelta(history);
+      const momentum = getMomentum(history);
       const color = getColor(delta);
 
       let size = "small";
@@ -120,7 +142,7 @@ function renderCards() {
         <div class="label">${t}</div>
         <div class="value">${rawData[t]}</div>
         <div class="delta" style="color:${color}">
-          ${delta}%
+          ${delta}% · ${momentum}%
         </div>
       `;
 
@@ -128,6 +150,7 @@ function renderCards() {
     });
   });
 }
+
 
 // ---------- REGIME ----------
 
@@ -153,6 +176,9 @@ function renderRegime() {
   el.innerText = text;
 }
 
+
+// ---------- LEGEND ----------
+
 function renderLegend() {
   const el = document.getElementById("legend");
 
@@ -174,27 +200,37 @@ function renderLegend() {
   `).join("");
 }
 
-// ---------- SIGNALS ----------
+
+// ---------- SIGNALS (NOW TIMEFRAME-AWARE) ----------
 
 function renderSignals() {
   const el = document.getElementById("signals");
   if (!el) return;
 
-  const d = rawData;
+  const h = {
+    UUP: getFiltered(rawData.history.UUP || []),
+    GLD: getFiltered(rawData.history.GLD || []),
+    USO: getFiltered(rawData.history.USO || []),
+    ITA: getFiltered(rawData.history.ITA || [])
+  };
+
   let signals = [];
 
-  if (d.UUP > 27.5) signals.push("💵 Tight Liquidity");
-  if (d.GLD < 405) signals.push("🪙 Gold Weak");
-  if (d.USO > 112) signals.push("🛢 Oil Elevated");
-  if (d.ITA > 220) signals.push("🛡 Defense Strong");
+  if (getMomentum(h.UUP) > 0.3) signals.push("💵 Tight");
+  if (getMomentum(h.GLD) < -0.5) signals.push("🪙 Gold↓");
+  if (getMomentum(h.USO) > 1.5) signals.push("🛢 Oil↑");
+  if (getMomentum(h.ITA) > 1.0) signals.push("🛡 Defense↑");
 
   el.innerHTML = signals.map(s => `<span class="chip">${s}</span>`).join("");
 }
+
 
 // ---------- CONTROLS ----------
 
 function setRange(days) {
   range = days;
+  renderCards();
+  renderSignals();
   renderChart();
 }
 
@@ -202,7 +238,6 @@ function setMode(m) {
   mode = m;
   renderChart();
 }
-
 
 
 // ---------- CHART ----------
@@ -213,10 +248,13 @@ function renderChart() {
   const tickers = ["SPY", "GLD", "USO", "UUP"];
 
   const datasets = tickers.map(t => {
-    let data = getFiltered(rawData.history[t]);
+    const full = rawData.history[t];
+    const sliced = getFiltered(full);
+
+    let data = sliced;
 
     if (mode === "norm") {
-      data = normalize(data);
+      data = normalize(sliced);
     }
 
     return {
